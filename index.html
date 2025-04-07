@@ -1,36 +1,133 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Chatbot SDG 4</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple Chatbot</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    .qa { margin-bottom: 20px; }
-    .question { font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .chat-container {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      margin: 0.5rem 0;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      max-width: 70%;
+    }
+
+    .user {
+      background-color: #d1e7dd;
+      align-self: flex-end;
+    }
+
+    .bot {
+      background-color: #e2e3e5;
+      align-self: flex-start;
+    }
+
+    .input-container {
+      display: flex;
+      padding: 1rem;
+      background: #fff;
+      border-top: 1px solid #ccc;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-left: 1rem;
+      padding: 0.6rem 1rem;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
-  <h1>SDG 4 Q&A</h1>
-  <div id="chat"></div>
+  <header>
+    <h1>Chatbot</h1>
+  </header>
+
+  <div class="chat-container" id="chat">
+    <!-- Messages appear here -->
+  </div>
+
+  <div class="input-container">
+    <input type="text" id="userInput" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzTVzsebZcBoUXTc5rXi3lJmQvxJSSdiKWK_LIS0VzSqGI9vUm0BvULutvG79wyZdIn/exec'; // Replace with your Google Apps Script URL
+    function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (message === "") return;
 
-    fetch(scriptURL)
-      .then(response => response.json())
-      .then(data => {
-        const container = document.getElementById('chat');
-        Object.entries(data).forEach(([question, answerObj]) => {
-          const div = document.createElement('div');
-          div.className = 'qa';
-          div.innerHTML = `<div class="question">${question}</div>
-                           <div class="answer">${answerObj.Answers}</div>`;
-          container.appendChild(div);
-        });
-      })
-      .catch(err => {
-        document.getElementById('chat').innerText = 'Error loading data.';
-        console.error(err);
-      });
+      // Display user message
+      addMessage(message, "user");
+
+      // Simulate bot response
+      setTimeout(() => {
+        const botResponse = generateBotResponse(message);
+        addMessage(botResponse, "bot");
+      }, 500);
+
+      input.value = "";
+    }
+
+    function addMessage(text, sender) {
+      const chat = document.getElementById("chat");
+      const messageElem = document.createElement("div");
+      messageElem.className = `message ${sender}`;
+      messageElem.textContent = text;
+      chat.appendChild(messageElem);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function generateBotResponse(userMessage) {
+      // Simple hardcoded responses
+      if (userMessage.toLowerCase().includes("hello")) {
+        return "Hi there! How can I help you?";
+      } else if (userMessage.toLowerCase().includes("help")) {
+        return "Sure! I can help you with something. Just ask.";
+      } else {
+        return "I'm just a demo bot. Say 'hello' or 'help'!";
+      }
+    }
   </script>
 </body>
 </html>
+
