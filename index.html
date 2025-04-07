@@ -1,133 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple Chatbot</title>
+  <title>Chatbot</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      background: #f9f9f9;
     }
-
-    header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-
     .chat-container {
-      flex: 1;
-      padding: 1rem;
+      max-width: 600px;
+      margin: 50px auto;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .messages {
+      height: 400px;
       overflow-y: auto;
-      display: flex;
-      flex-direction: column;
+      border: 1px solid #eee;
+      padding: 10px;
+      margin-bottom: 10px;
     }
-
     .message {
-      margin: 0.5rem 0;
-      padding: 0.6rem 1rem;
-      border-radius: 10px;
-      max-width: 70%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+      max-width: 80%;
     }
-
     .user {
-      background-color: #d1e7dd;
+      background-color: #dcf8c6;
       align-self: flex-end;
+      text-align: right;
+      margin-left: auto;
     }
-
     .bot {
-      background-color: #e2e3e5;
+      background-color: #f1f0f0;
       align-self: flex-start;
+      text-align: left;
+      margin-right: auto;
     }
-
     .input-container {
       display: flex;
-      padding: 1rem;
-      background: #fff;
-      border-top: 1px solid #ccc;
     }
-
     input[type="text"] {
       flex: 1;
-      padding: 0.6rem;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 16px;
     }
-
     button {
-      margin-left: 1rem;
-      padding: 0.6rem 1rem;
-      border: none;
-      background-color: #4CAF50;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4caf50;
       color: white;
-      border-radius: 5px;
+      border: none;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #45a049;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Chatbot</h1>
-  </header>
-
-  <div class="chat-container" id="chat">
-    <!-- Messages appear here -->
-  </div>
-
-  <div class="input-container">
-    <input type="text" id="userInput" placeholder="Type a message..." />
-    <button onclick="sendMessage()">Send</button>
+  <div class="chat-container">
+    <h2>Chatbot</h2>
+    <div class="messages" id="messages"></div>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Type your message..." onkeypress="if(event.key === 'Enter') sendMessage()">
+      <button onclick="sendMessage()">Send</button>
+    </div>
   </div>
 
   <script>
+    function addMessage(text, sender) {
+      const messageBox = document.getElementById("messages");
+      const message = document.createElement("div");
+      message.className = `message ${sender}`;
+      message.innerText = text;
+      messageBox.appendChild(message);
+      messageBox.scrollTop = messageBox.scrollHeight;
+    }
+
     function sendMessage() {
       const input = document.getElementById("userInput");
       const message = input.value.trim();
       if (message === "") return;
 
-      // Display user message
       addMessage(message, "user");
 
-      // Simulate bot response
-      setTimeout(() => {
-        const botResponse = generateBotResponse(message);
-        addMessage(botResponse, "bot");
-      }, 500);
+      // Replace this URL with your actual Web App URL
+      const scriptUrl = "https://script.google.com/macros/s/AKfycby9Hr6L7qUaASo_z0cgYrkXolN3lMVztVZcI7e2qkqbP3s17MHuv_z-I7JgE95Cbr4/exec";
+
+      fetch(scriptUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          queryResult: {
+            queryText: message
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        const reply = data.fulfillmentText || "No response.";
+        addMessage(reply, "bot");
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        addMessage("Error talking to the bot.", "bot");
+      });
 
       input.value = "";
-    }
-
-    function addMessage(text, sender) {
-      const chat = document.getElementById("chat");
-      const messageElem = document.createElement("div");
-      messageElem.className = `message ${sender}`;
-      messageElem.textContent = text;
-      chat.appendChild(messageElem);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function generateBotResponse(userMessage) {
-      // Simple hardcoded responses
-      if (userMessage.toLowerCase().includes("hello")) {
-        return "Hi there! How can I help you?";
-      } else if (userMessage.toLowerCase().includes("help")) {
-        return "Sure! I can help you with something. Just ask.";
-      } else {
-        return "I'm just a demo bot. Say 'hello' or 'help'!";
-      }
     }
   </script>
 </body>
 </html>
-
