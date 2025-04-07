@@ -1,134 +1,144 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Chatbot Interface</title>
+  <meta charset="UTF-8">
+  <title>Simple Firebase Chatbot</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f0f2f5;
       display: flex;
       justify-content: center;
-      padding: 50px;
+      align-items: center;
+      height: 100vh;
     }
-
     .chat-container {
-      background: white;
-      width: 100%;
-      max-width: 600px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 400px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
-
-    .chat-header {
-      background: #4CAF50;
-      color: white;
-      padding: 16px;
-      font-size: 20px;
-    }
-
-    .chat-box {
+    .messages {
       flex: 1;
-      padding: 16px;
-      overflow-y: auto;
       height: 400px;
-    }
-
-    .message {
-      margin: 10px 0;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
       padding: 10px;
       border-radius: 8px;
+    }
+    .message {
+      padding: 8px 12px;
+      margin: 6px 0;
+      border-radius: 10px;
       max-width: 80%;
+      word-wrap: break-word;
     }
-
     .user {
-      background-color: #dcf8c6;
       align-self: flex-end;
-      text-align: right;
-      margin-left: auto;
+      background: #dcf8c6;
     }
-
     .bot {
-      background-color: #f1f0f0;
       align-self: flex-start;
-      text-align: left;
-      margin-right: auto;
+      background: #eee;
     }
-
-    .input-area {
+    .input-box {
       display: flex;
-      border-top: 1px solid #ddd;
     }
-
-    .input-area input {
+    input {
       flex: 1;
-      padding: 15px;
-      border: none;
+      padding: 10px;
       font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
-
-    .input-area button {
-      background: #4CAF50;
+    button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #4caf50;
       color: white;
       border: none;
-      padding: 0 20px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
+    }
+    button:hover {
+      background: #45a049;
     }
   </style>
 </head>
 <body>
   <div class="chat-container">
-    <div class="chat-header">Talk with Computer</div>
-    <div class="chat-box" id="chatBox"></div>
-    <div class="input-area">
-      <input type="text" id="userInput" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendMessage()">
+    <div class="messages" id="messages"></div>
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Type your message..." onkeypress="if(event.key === 'Enter') sendMessage()">
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
-  <script>
-    const chatBox = document.getElementById('chatBox');
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
+  <script>
+    // Replace this with your Firebase project config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCeuGH4wPtV6UfqY0cV6z28o9G8MVTkVws",
+      authDomain: "chatbot-be4c3.firebaseapp.com",
+      databaseURL: "https://chatbot-be4c3.firebaseio.com",
+      projectId: "chatbot-be4c3",
+      storageBucket: "chatbot-be4c3.appspot.com",
+      messagingSenderId: "1013994620006",
+      appId: "1:1013994620006:web:225517ab2ef46ad6f859a7"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Load messages in real-time
+    db.ref('messages').on('child_added', snapshot => {
+      const msg = snapshot.val();
+      addMessage(msg.text, msg.sender);
+    });
+
+    // Add message to the chat
     function addMessage(text, sender) {
+      const msgBox = document.getElementById('messages');
       const msg = document.createElement('div');
-      msg.classList.add('message', sender);
-      msg.textContent = text;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      msg.className = `message ${sender}`;
+      msg.innerText = text;
+      msgBox.appendChild(msg);
+      msgBox.scrollTop = msgBox.scrollHeight;
     }
 
+    // Send message to Firebase
     function sendMessage() {
       const input = document.getElementById('userInput');
       const message = input.value.trim();
-      if (!message) return;
+      if (message === "") return;
 
-      addMessage(message, 'user');
-      input.value = '';
-
-      // 🔗 Replace this with your actual backend endpoint URL
-      const backendUrl = 'https://script.google.com/macros/s/AKfycbwMt7NfrROq8d3hoGmDzw_-Q0alZLde8-t5yrWAi4C-EIwK8LZZw-Oc2DWfjI6D06BN/exec';
-
-      fetch(backendUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          queryResult: { queryText: message }
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        const reply = data.fulfillmentText || 'No response';
-        addMessage(reply, 'bot');
-      })
-      .catch(err => {
-        console.error(err);
-        addMessage('Error connecting to the bot.', 'bot');
+      // Send user message
+      db.ref('messages').push({
+        sender: "user",
+        text: message,
+        timestamp: Date.now()
       });
+
+      // Optional: simulate bot reply (remove if you have real backend)
+      setTimeout(() => {
+        db.ref('messages').push({
+          sender: "bot",
+          text: "You said: " + message,
+          timestamp: Date.now()
+        });
+      }, 800);
+
+      input.value = "";
     }
   </script>
 </body>
 </html>
-
