@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot SDG 4</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .qa { margin-bottom: 20px; }
+    .question { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>SDG 4 Q&A</h1>
+  <div id="chat"></div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzTVzsebZcBoUXTc5rXi3lJmQvxJSSdiKWK_LIS0VzSqGI9vUm0BvULutvG79wyZdIn/exec'; // Replace with your Google Apps Script URL
+
+    fetch(scriptURL)
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('chat');
+        Object.entries(data).forEach(([question, answerObj]) => {
+          const div = document.createElement('div');
+          div.className = 'qa';
+          div.innerHTML = `<div class="question">${question}</div>
+                           <div class="answer">${answerObj.Answers}</div>`;
+          container.appendChild(div);
+        });
+      })
+      .catch(err => {
+        document.getElementById('chat').innerText = 'Error loading data.';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
